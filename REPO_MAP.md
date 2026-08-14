@@ -1,6 +1,6 @@
 # Vela-Configuration
 
-**Remote:** `git@github.com:SiliconCentric/Vela-Configuration.git`
+**Remote:** `git@github.com:soccentric-vela/Vela-Configuration.git`
 **Parent project:** [Vela](../Vela.md) (target hardware: **Qualcomm Snapdragon QCS6490**.)
 **Leaf type:** `<Project>-Configuration`
 **Status:** REAL — actively built out
