@@ -81,6 +81,63 @@ See [`meta-webconfig/README.md`](meta-webconfig/README.md).
 - [Board-manifest format](docs/board-manifest.md)
 - [Production-readiness audit](docs/planning/MasterPlan.md) and its [acceptance checklist](docs/planning/Checkpoint.md)
 
+## Project Summary
+
+The configuration service is designed as a small device-local control plane,
+not as a replacement for the fleet API. The Rust daemon owns HTTP concerns,
+authentication, request validation, event delivery, and backend coordination;
+the engine owns configuration state, schemas, manifests, and application
+logic. The frontend is vanilla JavaScript and the `schemas/` directory drives
+form rendering and validation. `meta-webconfig/` packages the daemon, assets,
+schemas, manifest, and hardened service unit for Yocto deployment. The Makefile
+also documents release, lint, formatting, vendoring, cross-target, and fake
+sysroot workflows. These local mocks are valuable for deterministic tests, but
+they cannot establish that real RAUC, zbus, systemd, networking, or board I/O
+behaves correctly. The feature table therefore reports the implemented seams
+and calls out runtime, failure-recovery, and hardware gaps explicitly.
+
+Operators should distinguish a fake-sysroot run from a safe change on a
+networked field unit. Credentials, certificates, service users, permissions,
+and manifest selection all affect the deployed result.
+
+The service boundary includes both read-only operational views and mutating
+configuration actions. Validation should cover malformed schema values,
+unauthorized requests, stale jobs, interrupted event streams, failed systemd
+operations, and persistence across restart. Network changes deserve special
+attention because a device can become unreachable before a confirmation is
+received. The fake-sysroot path is useful for exercising deterministic engine
+logic and HTTP behavior, while the Yocto layer demonstrates intended image
+packaging. Neither substitutes for checking certificates, permissions,
+firewall exposure, RAUC slots, zbus services, and recovery behavior on the
+actual board. The implementation status below is therefore deliberately more
+specific than a general claim that the configuration product is complete.
+
+## Feature Status
+
+The Rust workspace implements an on-device configuration service. Its daemon
+contains API modules for system, network, services, updates, monitoring, logs,
+alerts, security, and I/O, plus authentication, CSRF, TLS, SSE, jobs, state,
+systemd, and bootstrap support. `board-manifests/vela.json` and the generic
+manifest provide board data. `crates/webconfigd/src/tests.rs` provides local
+test evidence, while real backend, hardware, rollback, and production behavior
+still require runtime confirmation.
+
+| # | Name / Description | Implemented? | Test Coverage? | Manual Test |
+|---:|---|---|---|---|
+| 1 | Rust workspace and webconfig daemon | Implemented | `make test` / Rust tests documented; results not verified | [ ] Manual verification required |
+| 2 | System, network, service, update, monitoring, log, alert, security, and I/O APIs | Implemented | Partial in-source coverage | [ ] Manual verification required |
+| 3 | Authentication, role access, and CSRF protection | Implemented | Tests present; depth unknown | [ ] Manual verification required |
+| 4 | TLS server configuration | Implemented | Deployment coverage unknown | [ ] Manual verification required |
+| 5 | SSE event and job state handling | Implemented | In-source tests present; edge cases unknown | [ ] Manual verification required |
+| 6 | Schema-driven frontend and JSON schemas | Implemented | Schema/runtime coverage unknown | [ ] Manual verification required |
+| 7 | Vela and generic board manifests | Implemented | Manifest validation coverage unknown | [ ] Manual verification required |
+| 8 | Engine bridge and persistent configuration | Partial | Tests present; persistence depth unknown | [ ] Manual verification required |
+| 9 | Real RAUC/zbus/systemd backends | Partial | Mock/runtime coverage not established | [ ] Manual verification required |
+| 10 | Network commit/confirm rollback recovery | Unknown | No verified failure-injection result found | [ ] Manual verification required |
+
+Run `make build`, `make test`, and `make lint` from this repository; use
+`make run` for the fake-sysroot development path.
+
 ## License
 
 CLOSED (SoCcentric internal IV&V tooling).
