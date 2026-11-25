@@ -140,4 +140,4 @@ Run `make build`, `make test`, and `make lint` from this repository; use
 
 ## License
 
-CLOSED (SoCcentric internal IV&V tooling).
+MIT. See [LICENSE](LICENSE).
